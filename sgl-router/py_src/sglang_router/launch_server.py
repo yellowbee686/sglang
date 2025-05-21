@@ -15,7 +15,7 @@ from sglang_router.launch_router import RouterArgs, launch_router
 
 from sglang.srt.entrypoints.http_server import launch_server
 from sglang.srt.server_args import ServerArgs
-from sglang.srt.utils import is_port_available
+from sglang.srt.utils import is_port_available, is_valid_ipv6_address
 
 
 def setup_logger():
@@ -88,11 +88,16 @@ def launch_server_process(
     proc.start()
     return proc
 
+def url(host: str, port: int):
+    if is_valid_ipv6_address(host):
+        return f"http://[{host}]:{port}"
+    else:
+        return f"http://{host}:{port}"
 
 def wait_for_server_health(host: str, port: int, timeout: int = 300) -> bool:
     """Wait for server to be healthy by checking /health endpoint."""
     start_time = time.perf_counter()
-    url = f"http://{host}:{port}/health"
+    url = f"{url(host, port)}/health"
 
     while time.perf_counter() - start_time < timeout:
         try:
@@ -186,7 +191,7 @@ def main():
 
     # Update router args with worker URLs
     router_args.worker_urls = [
-        f"http://{server_args.host}:{port}" for port in worker_ports
+        url(server_args.host, port) for port in worker_ports
     ]
 
     # Start the router
