@@ -88,11 +88,13 @@ def launch_server_process(
     proc.start()
     return proc
 
+
 def url(host: str, port: int):
     if is_valid_ipv6_address(host):
         return f"http://[{host}]:{port}"
     else:
         return f"http://{host}:{port}"
+
 
 def wait_for_server_health(host: str, port: int, timeout: int = 300) -> bool:
     """Wait for server to be healthy by checking /health endpoint."""
@@ -190,9 +192,7 @@ def main():
     )
 
     # Update router args with worker URLs
-    router_args.worker_urls = [
-        url(server_args.host, port) for port in worker_ports
-    ]
+    router_args.worker_urls = [url(server_args.host, port) for port in worker_ports]
 
     # Start the router
     try:
